@@ -49,7 +49,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
 
-        event.update(
+        Event updatedevent = event.update(
                 updateDTO.getTitle(),
                 updateDTO.getStartTime(),
                 updateDTO.getEndTime(),
@@ -61,7 +61,7 @@ public class EventServiceImpl implements EventService {
                 updateDTO.getIntroduction()
         );
 
-        Event saved = eventRepository.save(event);
+        Event saved = eventRepository.save(updatedevent);
         return EventConverter.toResDTO(saved);
     }
 
