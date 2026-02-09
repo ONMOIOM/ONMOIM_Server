@@ -34,9 +34,10 @@ public class EventServiceImpl implements EventService {
     private final AnalyticsCommandService analyticsCommandService;
 
     @Override
-    public EventResDTO createDraftEvent() {
+    public EventResDTO createDraftEvent(User user) {
         Event eventEntity = Event.builder()
                 .status(Status.DRAFTED)
+                .host(user)
                 .build();
 
         Event saved = eventRepository.save(eventEntity);

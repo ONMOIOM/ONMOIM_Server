@@ -15,7 +15,8 @@ import java.util.List;
 @Tag(name = "행사 API", description = "행사 관련 API")
 public interface EventControllerDocs {
     @Operation(summary = "행사 초안 생성", description = "행사 상태를 drafted(초안) 상태로 생성합니다. 행사의 모든 필드는 null 상태로 저장됩니다.")
-    public ApiResponse<EventResDTO> createDraft();
+    public ApiResponse<EventResDTO> createDraft(
+            @AuthenticationPrincipal User user);
 
     @Operation(summary = "행사 내용 수정", description = "행사의 제목, 시간, 장소 등의 모든 정보를 부분 수정합니다.")
     public ApiResponse<EventResDTO> patchEvent

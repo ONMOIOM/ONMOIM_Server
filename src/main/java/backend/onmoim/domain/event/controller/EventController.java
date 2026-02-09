@@ -24,8 +24,8 @@ public class EventController implements EventControllerDocs {
     private final EventService eventService;
 
     @PostMapping("/events")
-    public ApiResponse<EventResDTO> createDraft() {
-        EventResDTO eventResDTO = eventService.createDraftEvent();
+    public ApiResponse<EventResDTO> createDraft(@AuthenticationPrincipal User user) {
+        EventResDTO eventResDTO = eventService.createDraftEvent(user);
         return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, eventResDTO);
     }
 

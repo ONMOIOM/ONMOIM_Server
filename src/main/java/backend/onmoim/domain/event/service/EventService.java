@@ -11,7 +11,7 @@ import backend.onmoim.domain.event.dto.res.ParticipantDto;
 import java.util.List;
 
 public interface EventService {
-    EventResDTO createDraftEvent();
+    EventResDTO createDraftEvent(User user);
     EventResDTO patchEvent(Long eventID, EventUpdateDTO updateDTO);
     EventResDTO publishEvent(Long eventID);
 
