@@ -48,6 +48,9 @@ class EmailAuthCommandServiceImpl implements EmailAuthCommandService {
     @Value("${spring.cloudflare.turnstile.verify-url}")
     private String turnstileVerifyUrl;
 
+    @Value("${spring.cloudflare.turnstile.test-token}") //테스트용 토큰
+    private String testToken;
+
 
      //생성자에서 RestTemplateBuilder를 주입받아 타임아웃을 설정
      public EmailAuthCommandServiceImpl(
@@ -72,16 +75,17 @@ class EmailAuthCommandServiceImpl implements EmailAuthCommandService {
 
     @Override
     public EmailAuthResponseDTO.VerificationResultDTO sendCode(EmailAuthRequestDTO.SendCodeDTO request, String ip) {
-        // 동일 이메일 발송 쿨타임 체크-1분
+
+         // 봇 방지 검증 (Turnstile)
+        verifyTurnstile(request.turnstileToken());
+
+         // 동일 이메일 발송 쿨타임 체크-30초
         String cooldownKey = "auth:cooldown:" + request.email();
-        Boolean isSet = redisTemplate.opsForValue().setIfAbsent(cooldownKey, "true", Duration.ofMinutes(1));
+        Boolean isSet = redisTemplate.opsForValue().setIfAbsent(cooldownKey, "true", Duration.ofSeconds(30));
         if (Boolean.FALSE.equals(isSet)) {
             throw new EmailAuthException(EmailAuthErrorCode.RATE_LIMITED);
         }
 
-
-        // 봇 방지 검증 (Turnstile)
-        verifyTurnstile(request.turnstileToken());
 
         //회원유무 조회
         boolean isRegistered = userQueryRepository.existsByEmail(request.email());
@@ -160,6 +164,12 @@ class EmailAuthCommandServiceImpl implements EmailAuthCommandService {
 
     // Cloudflare Turnstile 검증 로직
     private void verifyTurnstile(String token) {
+
+        if (testToken.equals(token)) {
+            log.info("테스트 환경에서 지정된 더미 토큰으로 Turnstile 검증을 우회합니다.");
+            return;
+        }
+
         if (token == null || token.isBlank()) {
             throw new EmailAuthException(EmailAuthErrorCode.BOT_DETECTED);
         } // 사전에 null인지 검사
