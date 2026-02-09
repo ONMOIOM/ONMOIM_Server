@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
-public class EventController {
+public class EventController implements EventControllerDocs {
 
     private final EventService eventService;
 
