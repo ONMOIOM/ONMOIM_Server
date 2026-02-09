@@ -38,6 +38,7 @@ spring:
   cloudflare:
     turnstile:
       secret-key: ${TURNSTILE_SECRET_KEY}
+      test-token: ${TEST_TURNSTILE_TOKEN}
       verify-url: https://challenges.cloudflare.com/turnstile/v0/siteverify
       
   data:
