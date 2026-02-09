@@ -55,7 +55,7 @@ public class Event extends BaseEntity {
     private List<Analytics> analytics = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "host_id")
+    @JoinColumn(name = "user_id")
     private User host;
 
     public Event update(String title, LocalDateTime startTime,
