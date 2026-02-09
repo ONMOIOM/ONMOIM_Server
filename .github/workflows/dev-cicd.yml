@@ -79,6 +79,7 @@ jobs:
               -e MAIL_USERNAME_2=${{ secrets.MAIL_USERNAME_2 }} \
               -e MAIL_PASSWORD_2=${{ secrets.MAIL_PASSWORD_2 }} \
               -e TURNSTILE_SECRET_KEY=${{ secrets.TURNSTILE_SECRET_KEY }} \
+              -e TEST_TURNSTILE_TOKEN=${{ secrets.TEST_TURNSTILE_TOKEN }} \
               -e MINIO_URL=${{ secrets.MINIO_URL }} \
               -e MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }} \
               -e MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }} \
