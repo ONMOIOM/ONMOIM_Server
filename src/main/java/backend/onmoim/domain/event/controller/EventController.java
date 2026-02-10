@@ -13,6 +13,7 @@ import backend.onmoim.global.common.code.GeneralSuccessCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -85,5 +86,15 @@ public class EventController implements EventControllerDocs {
     public ApiResponse<List<EventResDTO>> getHostedEvents(@AuthenticationPrincipal User user) {
         List<EventResDTO> events = eventService.getUserHostedEvents(user.getId());
         return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, events);
+    }
+
+    @PostMapping(value = "/events/{eventId}/image", consumes = "multipart/form-data")
+    public ApiResponse<String> uploadEventImage(
+            @PathVariable Long eventId,
+            @AuthenticationPrincipal User user,
+            @RequestParam("image") MultipartFile image
+    ) {
+        String imageUrl = eventService.uploadEventImage(eventId, user, image);
+        return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, imageUrl);
     }
 }

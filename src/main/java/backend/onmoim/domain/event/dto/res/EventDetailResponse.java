@@ -5,10 +5,12 @@ import backend.onmoim.domain.event.enums.EventStatus;
 import backend.onmoim.domain.event.enums.Status;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @Builder
 public class EventDetailResponse {
 
@@ -23,6 +25,7 @@ public class EventDetailResponse {
     private String playlistUrl;
     private Integer capacity;
     private Status status;
+    private String imageUrl;
 
     public static EventDetailResponse from(Event event) {
         return EventDetailResponse.builder()

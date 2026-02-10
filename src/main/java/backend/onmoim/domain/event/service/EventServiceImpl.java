@@ -15,16 +15,20 @@ import backend.onmoim.domain.user.entity.User;
 import backend.onmoim.domain.user.repository.UserRepository;
 import backend.onmoim.global.common.code.GeneralErrorCode;
 import backend.onmoim.global.common.exception.GeneralException;
+import backend.onmoim.global.utils.MinioUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import backend.onmoim.domain.analytics.service.AnalyticsCommandService;
 import backend.onmoim.domain.event.dto.res.ParticipantDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
@@ -33,6 +37,7 @@ public class EventServiceImpl implements EventService {
     private final EventMemberRepository eventMemberRepository;
     private final UserRepository userRepository;
     private final AnalyticsCommandService analyticsCommandService;
+    private final MinioUtil minioUtil;
 
     @Override
     public EventResDTO createDraftEvent(User user) {
@@ -85,7 +90,18 @@ public class EventServiceImpl implements EventService {
     public EventDetailResponse getEventDetail(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
-        return EventDetailResponse.from(event);
+        
+        EventDetailResponse response = EventDetailResponse.from(event);
+        
+        // 이미지 URL 추가
+        try {
+            String imageUrl = minioUtil.getEventImageUrl(eventId);
+            response.setImageUrl(imageUrl);
+        } catch (Exception e) {
+            log.warn("행사 이미지 URL 생성 실패: {}", e.getMessage());
+        }
+        
+        return response;
     }
 
     @Override
@@ -157,6 +173,51 @@ public class EventServiceImpl implements EventService {
         return eventMemberRepository.findAllByEvent(event).stream()
                 .map(ParticipantDto::from)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public String uploadEventImage(Long eventId, User user, MultipartFile image) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
+        
+        // 호스트만 이미지 업로드 가능
+        if (!event.getHost().getId().equals(user.getId())) {
+            throw new GeneralException(GeneralErrorCode.BAD_REQUEST);
+        }
+        
+        validateImage(image);
+        
+        try {
+            minioUtil.uploadEventImage(image, eventId);
+            return minioUtil.getEventImageUrl(eventId);
+        } catch (Exception e) {
+            log.error("행사 이미지 업로드 실패: {}", e.getMessage(), e);
+            throw new GeneralException(GeneralErrorCode.IMAGE_UPLOAD_FAILED);
+        }
+    }
+
+    private void validateImage(MultipartFile image) {
+        if (image == null || image.isEmpty()) {
+            throw new GeneralException(GeneralErrorCode.INVALID_IMAGE);
+        }
+
+        long size = image.getSize();
+        if (size > 10 * 1024 * 1024) { // 10MB 제한
+            throw new GeneralException(GeneralErrorCode.IMAGE_SIZE_EXCEEDED);
+        }
+
+        // 파일 형식 검증
+        String contentType = image.getContentType();
+        if (contentType == null || !isAllowedImageType(contentType)) {
+            throw new GeneralException(GeneralErrorCode.INVALID_IMAGE_TYPE);
+        }
+    }
+
+    private boolean isAllowedImageType(String contentType) {
+        return contentType.equals("image/jpeg") ||
+                contentType.equals("image/png") ||
+                contentType.equals("image/gif");
     }
 
 }

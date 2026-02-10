@@ -7,6 +7,7 @@ import backend.onmoim.domain.event.dto.res.EventResDTO;
 import backend.onmoim.domain.event.dto.res.EventUpdateDTO;
 import backend.onmoim.domain.user.entity.User;
 import backend.onmoim.domain.event.dto.res.ParticipantDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface EventService {
     List<EventResDTO> getUserParticipatingEvents(Long userId);
     List<EventResDTO> getUserHostedEvents(Long userId);
     List<ParticipantDto> getParticipants(Long eventId);
+    
+    String uploadEventImage(Long eventId, User user, MultipartFile image);
 }

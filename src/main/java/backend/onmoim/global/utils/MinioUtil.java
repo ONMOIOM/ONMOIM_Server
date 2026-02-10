@@ -38,9 +38,46 @@ public class MinioUtil {
         }
     }
 
+    public void uploadEventImage(MultipartFile file, Long eventId) {
+        try {
+            ensureBucketExists();
+
+            String filename = String.format("event/%d/thumbnail", eventId); // 행사마다 가상 폴더 생성
+
+            PutObjectArgs putArgs = PutObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(filename)
+                    .contentType(file.getContentType())
+                    .stream(file.getInputStream(), file.getSize(), 10 * 1024 * 1024)
+                    .build();
+
+            minioClient.putObject(putArgs);
+
+        } catch (Exception e) {
+            throw new GeneralException(GeneralErrorCode.IMAGE_UPLOAD_FAILED);
+        }
+    }
+
     public String getProfileImageUrl(Long userId) {
         try {
             String filename = String.format("user/profile/%d/profile", userId);
+
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.GET)
+                            .bucket(bucket)
+                            .object(filename)
+                            .expiry(7 * 24 * 60 * 60)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new GeneralException(GeneralErrorCode.INVALID_IMAGE);
+        }
+    }
+
+    public String getEventImageUrl(Long eventId) {
+        try {
+            String filename = String.format("event/%d/thumbnail", eventId);
 
             return minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -65,4 +66,11 @@ public interface EventControllerDocs {
 
     @Operation(summary = "내가 만든 행사 조회", description = "현재 로그인한 사용자가 호스트로 생성한 행사 목록을 조회합니다.")
     public ApiResponse<List<EventResDTO>> getHostedEvents(@AuthenticationPrincipal User user);
+
+    @Operation(summary = "행사 이미지 업로드", description = "행사 썸네일 이미지를 업로드합니다. 호스트만 업로드할 수 있습니다.")
+    public ApiResponse<String> uploadEventImage(
+            @Parameter(description = "이미지를 업로드할 행사 ID", required = true, example = "1")
+            @PathVariable Long eventId,
+            @AuthenticationPrincipal User user,
+            @RequestParam("image") MultipartFile image);
 }
