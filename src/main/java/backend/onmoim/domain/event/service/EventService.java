@@ -21,5 +21,6 @@ public interface EventService {
     void castVote(Long eventId, User user, VoteRequest request);
 
     List<EventResDTO> getUserParticipatingEvents(Long userId);
+    List<EventResDTO> getUserHostedEvents(Long userId);
     List<ParticipantDto> getParticipants(Long eventId);
 }

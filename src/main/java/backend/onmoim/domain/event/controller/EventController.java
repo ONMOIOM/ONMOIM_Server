@@ -54,9 +54,8 @@ public class EventController implements EventControllerDocs {
         return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, response);
     }
 
-    @PostMapping("/events/{eventId}/participants/{userId}")
+    @PostMapping("/events/{eventId}/participants")
     public ApiResponse<String> castVote(@PathVariable Long eventId,
-                                        @PathVariable Long userId,
                                         @AuthenticationPrincipal User user,
                                         @RequestBody VoteRequest request) {
         eventService.castVote(eventId, user, request);
@@ -76,9 +75,15 @@ public class EventController implements EventControllerDocs {
         return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, null);
     }
 
-    @GetMapping("/{userId}/events")
-    public ApiResponse<List<EventResDTO>> getUserEvents(@AuthenticationPrincipal User user) {
+    @GetMapping("/events/participating")
+    public ApiResponse<List<EventResDTO>> getParticipatingEvents(@AuthenticationPrincipal User user) {
         List<EventResDTO> events = eventService.getUserParticipatingEvents(user.getId());
+        return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, events);
+    }
+
+    @GetMapping("/events/hosted")
+    public ApiResponse<List<EventResDTO>> getHostedEvents(@AuthenticationPrincipal User user) {
+        List<EventResDTO> events = eventService.getUserHostedEvents(user.getId());
         return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, events);
     }
 }
