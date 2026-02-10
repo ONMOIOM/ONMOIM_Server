@@ -90,6 +90,7 @@ public class Event extends BaseEntity {
                 .introduction(this.introduction)
                 .status(Status.PUBLISHED)
                 .playlistUrl(this.playlistUrl)
+                .host(this.host)
                 .build();
     }
 }
