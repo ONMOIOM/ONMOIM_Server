@@ -90,25 +90,46 @@ public class EventServiceImpl implements EventService {
     public EventDetailResponse getEventDetail(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
-        
-        EventDetailResponse response = EventDetailResponse.from(event);
-        
+        String imageUrl = null;
+
         // 이미지 URL 추가
         try {
-            String imageUrl = minioUtil.getEventImageUrl(eventId);
-            response.setImageUrl(imageUrl);
+            imageUrl = minioUtil.getEventImageUrl(eventId);
         } catch (Exception e) {
             log.warn("행사 이미지 URL 생성 실패: {}", e.getMessage());
         }
-        
-        return response;
+
+        return EventDetailResponse.from(event, imageUrl);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<EventListResponse> getEvents() {
         return eventRepository.findAll().stream()
-                .map(EventListResponse::from)
+                .map(event -> {
+                    EventListResponse response = EventListResponse.from(event);
+                    try {
+                        String imageUrl = minioUtil.getEventImageUrl(event.getId());
+                        return EventListResponse.builder()
+                                .eventId(response.getEventId())
+                                .status(response.getStatus())
+                                .title(response.getTitle())
+                                .schedule(response.getSchedule())
+                                .location(response.getLocation())
+                                .capacity(response.getCapacity())
+                                .playlist(response.getPlaylist())
+                                .price(response.getPrice())
+                                .information(response.getInformation())
+                                .hostName(response.getHostName())
+                                .imageUrl(imageUrl)
+                                .createdAt(response.getCreatedAt())
+                                .updatedAt(response.getUpdatedAt())
+                                .build();
+                    } catch (Exception e) {
+                        log.warn("행사 이미지 URL 생성 실패 (eventId: {}): {}", event.getId(), e.getMessage());
+                        return response;
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
@@ -147,8 +168,30 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public List<EventResDTO> getUserParticipatingEvents(Long userId){
         List<Event> events = eventMemberRepository.findEventByUserId(userId);
-        return  events.stream()
-                .map(EventConverter::toResDTO)
+        return events.stream()
+                .map(event -> {
+                    EventResDTO dto = EventConverter.toResDTO(event);
+                    try {
+                        String imageUrl = minioUtil.getEventImageUrl(event.getId());
+                        return EventResDTO.builder()
+                                .eventId(dto.getEventId())
+                                .title(dto.getTitle())
+                                .startTime(dto.getStartTime())
+                                .endTime(dto.getEndTime())
+                                .streetAddress(dto.getStreetAddress())
+                                .lotNumberAddress(dto.getLotNumberAddress())
+                                .price(dto.getPrice())
+                                .playlistUrl(dto.getPlaylistUrl())
+                                .capacity(dto.getCapacity())
+                                .introduction(dto.getIntroduction())
+                                .status(dto.getStatus())
+                                .imageUrl(imageUrl)
+                                .build();
+                    } catch (Exception e) {
+                        log.warn("행사 이미지 URL 생성 실패 (eventId: {}): {}", event.getId(), e.getMessage());
+                        return dto;
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
@@ -160,7 +203,29 @@ public class EventServiceImpl implements EventService {
         
         List<Event> events = eventRepository.findByHost(user);
         return events.stream()
-                .map(EventConverter::toResDTO)
+                .map(event -> {
+                    EventResDTO dto = EventConverter.toResDTO(event);
+                    try {
+                        String imageUrl = minioUtil.getEventImageUrl(event.getId());
+                        return EventResDTO.builder()
+                                .eventId(dto.getEventId())
+                                .title(dto.getTitle())
+                                .startTime(dto.getStartTime())
+                                .endTime(dto.getEndTime())
+                                .streetAddress(dto.getStreetAddress())
+                                .lotNumberAddress(dto.getLotNumberAddress())
+                                .price(dto.getPrice())
+                                .playlistUrl(dto.getPlaylistUrl())
+                                .capacity(dto.getCapacity())
+                                .introduction(dto.getIntroduction())
+                                .status(dto.getStatus())
+                                .imageUrl(imageUrl)
+                                .build();
+                    } catch (Exception e) {
+                        log.warn("행사 이미지 URL 생성 실패 (eventId: {}): {}", event.getId(), e.getMessage());
+                        return dto;
+                    }
+                })
                 .collect(Collectors.toList());
     }
 

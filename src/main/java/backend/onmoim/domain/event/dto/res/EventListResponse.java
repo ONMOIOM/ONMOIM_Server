@@ -20,6 +20,7 @@ public class EventListResponse {
     private String playlist;
     private String information;
     private String hostName;
+    private String imageUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

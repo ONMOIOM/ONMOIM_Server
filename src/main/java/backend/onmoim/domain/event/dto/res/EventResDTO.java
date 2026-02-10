@@ -22,5 +22,6 @@ public class EventResDTO {
     private Integer capacity;
     private String introduction;
     private Status status;
+    private String imageUrl;
 
 }

@@ -1,16 +1,13 @@
 package backend.onmoim.domain.event.dto.res;
 
 import backend.onmoim.domain.event.entity.Event;
-import backend.onmoim.domain.event.enums.EventStatus;
 import backend.onmoim.domain.event.enums.Status;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @Builder
 public class EventDetailResponse {
 
@@ -27,7 +24,7 @@ public class EventDetailResponse {
     private Status status;
     private String imageUrl;
 
-    public static EventDetailResponse from(Event event) {
+    public static EventDetailResponse from(Event event, String imageUrl) {
         return EventDetailResponse.builder()
                 .eventId(event.getId())
                 .title(event.getTitle())
@@ -40,6 +37,7 @@ public class EventDetailResponse {
                 .status(event.getStatus())
                 .playlistUrl(event.getPlaylistUrl())
                 .capacity(event.getCapacity())
+                .imageUrl(imageUrl)
                 .build();
     }
 }
