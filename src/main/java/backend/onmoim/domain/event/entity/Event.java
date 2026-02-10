@@ -61,7 +61,7 @@ public class Event extends BaseEntity {
     public Event update(String title, LocalDateTime startTime,
                         LocalDateTime endTime, String streetAddress,
                         String lotNumberAddress, Integer price,
-                        String playlistUrl, Integer capacity,String introduction) {
+                        String playlistUrl, Integer capacity,String introduction,User user) {
         return Event.builder()
                 .id(this.id)
                 .title(title != null ? title : this.title)
@@ -74,10 +74,11 @@ public class Event extends BaseEntity {
                 .introduction(introduction != null ? introduction : this.introduction)
                 .status(this.status)
                 .playlistUrl(playlistUrl != null ? playlistUrl: this.playlistUrl)
+                .host(this.host)
                 .build();
     }
 
-    public Event publish() {
+    public Event publish(User user) {
         return Event.builder()
                 .id(this.id)
                 .title(this.title)
@@ -90,6 +91,7 @@ public class Event extends BaseEntity {
                 .introduction(this.introduction)
                 .status(Status.PUBLISHED)
                 .playlistUrl(this.playlistUrl)
+                .host(this.host)
                 .build();
     }
 }

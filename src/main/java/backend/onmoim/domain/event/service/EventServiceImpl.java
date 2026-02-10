@@ -16,6 +16,7 @@ import backend.onmoim.domain.user.repository.UserRepository;
 import backend.onmoim.global.common.code.GeneralErrorCode;
 import backend.onmoim.global.common.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import backend.onmoim.domain.analytics.service.AnalyticsCommandService;
@@ -46,7 +47,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventResDTO patchEvent(Long eventId, EventUpdateDTO updateDTO) {
+    public EventResDTO patchEvent(Long eventId, EventUpdateDTO updateDTO,User user) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
 
@@ -59,7 +60,8 @@ public class EventServiceImpl implements EventService {
                 updateDTO.getPrice(),
                 updateDTO.getPlaylistUrl(),
                 updateDTO.getCapacity(),
-                updateDTO.getIntroduction()
+                updateDTO.getIntroduction(),
+                user
         );
 
         Event saved = eventRepository.save(updatedevent);
@@ -68,10 +70,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventResDTO publishEvent(Long eventID) {
+    public EventResDTO publishEvent(Long eventID, User user) {
         Event event = eventRepository.findById(eventID)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
-        Event publishedEvent = event.publish();
+        Event publishedEvent = event.publish(user);
         Event saved = eventRepository.save(publishedEvent);
 
         analyticsCommandService.createTodayAnalyticsTable(saved);

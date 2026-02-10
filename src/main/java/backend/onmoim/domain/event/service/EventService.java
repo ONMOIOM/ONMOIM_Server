@@ -12,8 +12,8 @@ import java.util.List;
 
 public interface EventService {
     EventResDTO createDraftEvent(User user);
-    EventResDTO patchEvent(Long eventID, EventUpdateDTO updateDTO);
-    EventResDTO publishEvent(Long eventID);
+    EventResDTO patchEvent(Long eventID, EventUpdateDTO updateDTO,User user);
+    EventResDTO publishEvent(Long eventID, User user);
 
     EventDetailResponse getEventDetail(Long eventId);
     List<EventListResponse> getEvents();

@@ -21,12 +21,14 @@ public interface EventControllerDocs {
     @Operation(summary = "행사 내용 수정", description = "행사의 제목, 시간, 장소 등의 모든 정보를 부분 수정합니다.")
     public ApiResponse<EventResDTO> patchEvent
             (@Parameter(description = "수정할 행사 ID", required = true, example = "1") @PathVariable Long eventId,
-             @RequestBody EventUpdateDTO updates);
+             @RequestBody EventUpdateDTO updates,
+             @AuthenticationPrincipal User user);
 
     @Operation(summary = "행사 최종 생성", description = "행사 상태를 published(최종 생성) 상태로 수정하고 Analytics 테이블을 생성합니다.")
     public ApiResponse<EventResDTO> publishEvent(
             @Parameter(description = "발행할 행사 ID", required = true, example = "1")
-            @PathVariable Long eventId);
+            @PathVariable Long eventId,
+            @AuthenticationPrincipal User user);
 
     @Operation(summary = "내가 참여한 행사 조회", description = "현재 로그인한 사용자가 참여(투표 상태 = ATTEND)한 행사 목록을 조회합니다.")
     public ApiResponse<List<EventResDTO>> getUserEvents(@AuthenticationPrincipal User user);

@@ -31,14 +31,14 @@ public class EventController implements EventControllerDocs {
 
     @PatchMapping("/events/{eventId}")
     public ApiResponse<EventResDTO> patchEvent
-            (@PathVariable Long eventId, @RequestBody EventUpdateDTO updates){
-        EventResDTO eventResDTO = eventService.patchEvent(eventId, updates);
+            (@PathVariable Long eventId, @RequestBody EventUpdateDTO updates, @AuthenticationPrincipal User user) {
+        EventResDTO eventResDTO = eventService.patchEvent(eventId, updates, user);
         return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, eventResDTO);
     }
 
     @PostMapping("/events/{eventId}/published")
-    public ApiResponse<EventResDTO> publishEvent(@PathVariable Long eventId){
-        EventResDTO eventResDTO = eventService.publishEvent(eventId);
+    public ApiResponse<EventResDTO> publishEvent(@PathVariable Long eventId, @AuthenticationPrincipal User user) {
+        EventResDTO eventResDTO = eventService.publishEvent(eventId, user);
         return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, eventResDTO);
     }
 
