@@ -58,33 +58,27 @@ jobs:
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_KEY }}
           script: |
+            cd /home/ubuntu
+            
+            echo "새 이미지 pull"
             docker pull ${{ secrets.DOCKER_USERNAME }}/onmoim:develop
-            docker stop app-dev || true
-            docker rm app-dev || true
-            docker run -d --name app-dev \
-              -p 8080:8080 \
-              -e SPRING_PROFILES_ACTIVE=dev \
-              -e DEV_DB_URL=${{ secrets.DEV_DB_URL }} \
-              -e DEV_DB_USER=${{ secrets.DEV_DB_USER }} \
-              -e DEV_DB_PW=${{ secrets.DEV_DB_PW }} \
-              -e DEV_URL=${{ secrets.DEV_URL }} \
-              -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
-              -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
-              -e REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
-              -e JWT_SECRET_KEY=${{secrets.JWT_SECRET_KEY}} \
-              -e JWT_TOKEN_EXPIRATION_ACCESS=3600000 \
-              -e JWT_TOKEN_EXPIRATION_REFRESH=604800000 \
-              -e MAIL_USERNAME_1=${{ secrets.MAIL_USERNAME_1 }} \
-              -e MAIL_PASSWORD_1=${{ secrets.MAIL_PASSWORD_1 }} \
-              -e MAIL_USERNAME_2=${{ secrets.MAIL_USERNAME_2 }} \
-              -e MAIL_PASSWORD_2=${{ secrets.MAIL_PASSWORD_2 }} \
-              -e TURNSTILE_SECRET_KEY=${{ secrets.TURNSTILE_SECRET_KEY }} \
-              -e TEST_TURNSTILE_TOKEN=${{ secrets.TEST_TURNSTILE_TOKEN }} \
-              -e MINIO_URL=${{ secrets.MINIO_URL }} \
-              -e MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }} \
-              -e MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }} \
-              -e MINIO_BUCKET=${{ secrets.MINIO_BUCKET }} \
-              ${{ secrets.DOCKER_USERNAME }}/onmoim:develop
+            
+            echo "Docker Compose 재배포"
+            docker compose down
+            docker compose up -d
+            
+            # 헬스체크 대기
+            sleep 30
+            
+            # 상태 확인
+            echo "서비스 상태 확인:"
+            docker compose ps
+            
+            # 헬스체크 상세 확인
+            echo "상세 상태:"
+            docker ps -a
+            
+            echo "배포 완료"
 
       - name: Send Discord Notification on Failure
         if: failure()
