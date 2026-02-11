@@ -236,7 +236,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
 
         return eventMemberRepository.findAllByEvent(event).stream()
-                .map(ParticipantDto::from)
+                .map(member -> ParticipantDto.from(member, minioUtil))
                 .collect(Collectors.toList());
     }
 
