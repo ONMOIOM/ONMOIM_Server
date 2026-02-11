@@ -105,15 +105,18 @@ public class UserQueryServiceImpl implements UserQueryService{
 
     @Override
     @Transactional(readOnly = true)
-    public UserProfileDTO getMyProfile(@AuthenticationPrincipal User user) {
+    public UserProfileDTO getProfile(@AuthenticationPrincipal User user, Long userId) {
         if (user.getStatus() != Status.ACTIVE) {
             throw new GeneralException(GeneralErrorCode.USER_INACTIVE);
         }
 
-        UserProfileDTO dto = UserConverter.toProfileDTO(user);
+        User userprofile = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+
+        UserProfileDTO dto = UserConverter.toProfileDTO(userprofile);
         String imageUrl = null;
         try {
-                imageUrl = minioUtil.getProfileImageUrl(user.getId());
+                imageUrl = minioUtil.getProfileImageUrl(userId);
             } catch (Exception e) {
                 log.warn("프로필 이미지 URL 생성 실패: {}", e.getMessage(), e);
             }

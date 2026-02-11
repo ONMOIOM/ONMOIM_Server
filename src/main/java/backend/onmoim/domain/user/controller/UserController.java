@@ -44,10 +44,11 @@ public class UserController implements UserControllerDocs {
     }
 
     @Override
-    @GetMapping("")
-    public ApiResponse<UserProfileDTO> getMyProfile(
-            @AuthenticationPrincipal User user) {
-        return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, userQueryService.getMyProfile(user));
+    @GetMapping("/{userId}")
+    public ApiResponse<UserProfileDTO> getProfile(
+            @AuthenticationPrincipal User user,
+            @PathVariable("userId") Long userId) {
+        return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, userQueryService.getProfile(user, userId));
     }
       
     @Override

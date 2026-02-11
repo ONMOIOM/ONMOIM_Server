@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,7 +34,7 @@ public interface UserControllerDocs {
     );
 
     @Operation(summary = "회원 조회", description = "가입된 사용자 정보를 조회합니다.")
-    ApiResponse<UserProfileDTO> getMyProfile(@AuthenticationPrincipal User user);
+    ApiResponse<UserProfileDTO> getProfile(@AuthenticationPrincipal User user, @PathVariable Long userId);
   
     @Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 처리합니다.")
     ApiResponse<Void> withdraw(

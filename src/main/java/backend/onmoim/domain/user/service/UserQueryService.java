@@ -21,7 +21,7 @@ public interface UserQueryService {
     SignUpResponseDTO.SignUpDTO signup(SignUpRequestDTO.SignUpDTO dto);
 
     @Transactional
-    UserProfileDTO getMyProfile(@AuthenticationPrincipal User user);
+    UserProfileDTO getProfile(@AuthenticationPrincipal User user, Long userId);
 
     @Transactional
     UserProfileDTO updateMyProfile(@AuthenticationPrincipal User loginUser, UserProfileUpdateDTO dto);
