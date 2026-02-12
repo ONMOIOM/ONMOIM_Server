@@ -80,18 +80,9 @@ public class MinioUtil {
     }
 
     public String getProfileImageUrl(Long userId) {
+        String filename = String.format("user/profile/%d/profile", userId);
+
         try {
-            String filename = String.format("user/profile/%d/profile", userId);
-
-            // 파일 존재 여부 확인 (내부 클라이언트)
-            internalClient.statObject(
-                    StatObjectArgs.builder()
-                            .bucket(bucket)
-                            .object(filename)
-                            .build()
-            );
-
-            // 공개 URL로 presigned URL 생성 (public 클라이언트)
             String url = publicClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
@@ -101,11 +92,11 @@ public class MinioUtil {
                             .build()
             );
 
-            log.debug("프로필 이미지 URL 생성 성공 - userId: {}", userId);
+            log.info("Profile URL 생성 성공: {}", url.substring(0, 50) + "...");
             return url;
 
         } catch (Exception e) {
-            log.warn("프로필 이미지 URL 생성 실패 - userId: {}, error: {}", userId, e.getMessage());
+            log.warn("URL 생성 실패 (파일 없음 가능성): userId={}, filename={}", userId, filename);
             return null;
         }
     }
