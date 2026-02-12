@@ -20,6 +20,9 @@ public class MinioUtil {
     @Value("${minio.bucket}")
     private String bucket;
 
+    @Value("${minio.public-url}")
+    private String publicUrl;
+
     public void uploadProfileImage(MultipartFile file, Long userId) {
         try {
             log.info("프로필 이미지 업로드 시작 - userId: {}, bucket: {}", userId, bucket);
@@ -91,7 +94,7 @@ public class MinioUtil {
                             .build()
             );
             log.debug("프로필 이미지 URL 생성 성공 - userId: {}", userId);
-            return url;
+            return url.replace("http://168.138.41.19:9000", publicUrl);
         } catch (Exception e) {
             log.warn("프로필 이미지 URL 생성 실패 - userId: {}, error: {}", userId, e.getMessage());
             return null;
@@ -121,7 +124,7 @@ public class MinioUtil {
                             .build()
             );
             log.debug("행사 이미지 URL 생성 성공 - eventId: {}", eventId);
-            return url;
+            return url.replace("http://168.138.41.19:9000", publicUrl);
         } catch (Exception e) {
             log.warn("행사 이미지 URL 생성 실패 - eventId: {}, error: {}", eventId, e.getMessage());
             return null;
