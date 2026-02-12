@@ -72,3 +72,10 @@ minio:
   access-key: ${MINIO_ACCESS_KEY}
   secret-key: ${MINIO_SECRET_KEY}
   bucket: ${MINIO_BUCKET}
+
+oci:
+  endpoint: https://axjyysxkd54x.compat.objectstorage.ap-osaka-1.oraclecloud.com
+  region: ap-osaka-1
+  access-key: ${OCI_ACCESS_KEY}
+  secret-key: ${OCI_SECRET_KEY}
+  bucket: bucket-onmoim
