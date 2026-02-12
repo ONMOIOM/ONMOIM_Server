@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentQueryServiceImpl implements CommentQueryService {
     private final CommentRepository commentRepository;
     private final EventRepository eventRepository;
+    private final CommentConverter commentConverter;
 
     @Override
     public CommentResponseDTO.CommentCursorListDTO getCommentList(Long eventId, Long lastCommentId) {
@@ -40,6 +41,6 @@ public class CommentQueryServiceImpl implements CommentQueryService {
         Long nextCursor = commentSlice.hasNext() ? commentSlice.getContent().get(commentSlice.getContent().size() - 1).getId() : null;
 
         // Converter를 통해 DTO로 변환 시 eventId를 함께 전달
-        return CommentConverter.toCommentCursorListDTO(eventId, commentSlice, nextCursor);
+        return commentConverter.toCommentCursorListDTO(eventId, commentSlice, nextCursor);
     }
 }

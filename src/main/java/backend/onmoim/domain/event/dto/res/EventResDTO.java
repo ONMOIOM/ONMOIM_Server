@@ -23,5 +23,13 @@ public class EventResDTO {
     private String introduction;
     private Status status;
     private String imageUrl;
+    private HostInfo host;
 
+    @Getter
+    @Builder
+    public static class HostInfo {
+        private Long hostId;
+        private String hostName;
+        private String hostImageUrl;
+    }
 }

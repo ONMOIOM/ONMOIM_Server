@@ -4,12 +4,20 @@ import backend.onmoim.domain.comment.dto.response.CommentResponseDTO;
 import backend.onmoim.domain.comment.entity.Comment;
 import backend.onmoim.domain.event.entity.Event;
 import backend.onmoim.domain.user.entity.User;
+import backend.onmoim.global.utils.MinioUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
+@RequiredArgsConstructor
 public class CommentConverter {
+    
+    private final MinioUtil minioUtil;
+
     public static Comment toComment(String content, User user, Event event) {
         return Comment.builder()
                 .content(content)
@@ -18,10 +26,11 @@ public class CommentConverter {
                 .build();
     }
 
-    public static CommentResponseDTO.CommentResultDTO toCommentResultDTO(Comment comment) {
+    public CommentResponseDTO.CommentResultDTO toCommentResultDTO(Comment comment) {
         User user = comment.getUser();
-        // 프로필 이미지가 없을 경우를 대비한 Null 체크
-        String profileUrl = (user.getProfileImage() != null) ? user.getProfileImage().getImageUrl() : null;
+        
+        // MinIO에서 프로필 이미지 URL 동적 생성
+        String profileUrl = minioUtil.getProfileImageUrl(user.getId());
 
         return new CommentResponseDTO.CommentResultDTO(
                 comment.getId(),
@@ -32,13 +41,13 @@ public class CommentConverter {
         );
     }
 
-    public static CommentResponseDTO.CommentCursorListDTO toCommentCursorListDTO(Long eventId, Slice<Comment> commentSlice, Long nextCursor) {
+    public CommentResponseDTO.CommentCursorListDTO toCommentCursorListDTO(Long eventId, Slice<Comment> commentSlice, Long nextCursor) {
         List<CommentResponseDTO.CommentResultDTO> commentResultDTOList = commentSlice.getContent().stream()
-                .map(CommentConverter::toCommentResultDTO)
+                .map(this::toCommentResultDTO)
                 .collect(Collectors.toList());
 
         return new CommentResponseDTO.CommentCursorListDTO(
-                eventId,                // 매핑됨
+                eventId,
                 commentResultDTOList,
                 nextCursor,
                 commentSlice.hasNext()

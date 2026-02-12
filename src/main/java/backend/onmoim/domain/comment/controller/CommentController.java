@@ -24,6 +24,7 @@ public class CommentController { // PascalCase 클래스 네이밍 준수
 
     private final CommentCommandService commentCommandService;
     private final CommentQueryService commentQueryService;
+    private final CommentConverter commentConverter;
 
     @Operation(summary = "댓글 작성 API", description = "특정 이벤트에 댓글을 작성합니다.")
     @PostMapping("/events/{eventId}/comments")
@@ -34,7 +35,7 @@ public class CommentController { // PascalCase 클래스 네이밍 준수
 
         Comment comment = commentCommandService.createComment(eventId, user, request);
 
-        return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK,CommentConverter.toCommentResultDTO(comment));
+        return ApiResponse.onSuccess(GeneralSuccessCode.REQUEST_OK, commentConverter.toCommentResultDTO(comment));
     }
 
     @Operation(summary = "댓글 목록 조회 API (커서 기반)", description = "특정 행사의 댓글을 최신순으로 조회합니다.")

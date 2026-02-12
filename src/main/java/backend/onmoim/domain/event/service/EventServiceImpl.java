@@ -90,16 +90,25 @@ public class EventServiceImpl implements EventService {
     public EventDetailResponse getEventDetail(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
+        
         String imageUrl = null;
-
-        // 이미지 URL 추가
+        String hostImageUrl = null;
+        
         try {
             imageUrl = minioUtil.getEventImageUrl(eventId);
         } catch (Exception e) {
             log.warn("행사 이미지 URL 생성 실패: {}", e.getMessage());
         }
-
-        return EventDetailResponse.from(event, imageUrl);
+        
+        if (event.getHost() != null) {
+            try {
+                hostImageUrl = minioUtil.getProfileImageUrl(event.getHost().getId());
+            } catch (Exception e) {
+                log.warn("호스트 이미지 URL 생성 실패: {}", e.getMessage());
+            }
+        }
+        
+        return EventDetailResponse.from(event, imageUrl, hostImageUrl);
     }
 
     @Override
@@ -108,27 +117,39 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findAll().stream()
                 .map(event -> {
                     EventListResponse response = EventListResponse.from(event);
+                    String imageUrl = null;
+                    String hostImageUrl = null;
+                    
                     try {
-                        String imageUrl = minioUtil.getEventImageUrl(event.getId());
-                        return EventListResponse.builder()
-                                .eventId(response.getEventId())
-                                .status(response.getStatus())
-                                .title(response.getTitle())
-                                .schedule(response.getSchedule())
-                                .location(response.getLocation())
-                                .capacity(response.getCapacity())
-                                .playlist(response.getPlaylist())
-                                .price(response.getPrice())
-                                .information(response.getInformation())
-                                .hostName(response.getHostName())
-                                .imageUrl(imageUrl)
-                                .createdAt(response.getCreatedAt())
-                                .updatedAt(response.getUpdatedAt())
-                                .build();
+                        imageUrl = minioUtil.getEventImageUrl(event.getId());
                     } catch (Exception e) {
                         log.warn("행사 이미지 URL 생성 실패 (eventId: {}): {}", event.getId(), e.getMessage());
-                        return response;
                     }
+                    
+                    if (event.getHost() != null) {
+                        try {
+                            hostImageUrl = minioUtil.getProfileImageUrl(event.getHost().getId());
+                        } catch (Exception e) {
+                            log.warn("호스트 이미지 URL 생성 실패 (userId: {}): {}", event.getHost().getId(), e.getMessage());
+                        }
+                    }
+                    
+                    return EventListResponse.builder()
+                            .eventId(response.getEventId())
+                            .status(response.getStatus())
+                            .title(response.getTitle())
+                            .schedule(response.getSchedule())
+                            .location(response.getLocation())
+                            .capacity(response.getCapacity())
+                            .playlist(response.getPlaylist())
+                            .price(response.getPrice())
+                            .information(response.getInformation())
+                            .hostName(response.getHostName())
+                            .hostImageUrl(hostImageUrl)
+                            .imageUrl(imageUrl)
+                            .createdAt(response.getCreatedAt())
+                            .updatedAt(response.getUpdatedAt())
+                            .build();
                 })
                 .collect(Collectors.toList());
     }
@@ -171,26 +192,42 @@ public class EventServiceImpl implements EventService {
         return events.stream()
                 .map(event -> {
                     EventResDTO dto = EventConverter.toResDTO(event);
+                    String imageUrl = null;
+                    String hostImageUrl = null;
+                    
                     try {
-                        String imageUrl = minioUtil.getEventImageUrl(event.getId());
-                        return EventResDTO.builder()
-                                .eventId(dto.getEventId())
-                                .title(dto.getTitle())
-                                .startTime(dto.getStartTime())
-                                .endTime(dto.getEndTime())
-                                .streetAddress(dto.getStreetAddress())
-                                .lotNumberAddress(dto.getLotNumberAddress())
-                                .price(dto.getPrice())
-                                .playlistUrl(dto.getPlaylistUrl())
-                                .capacity(dto.getCapacity())
-                                .introduction(dto.getIntroduction())
-                                .status(dto.getStatus())
-                                .imageUrl(imageUrl)
-                                .build();
+                        imageUrl = minioUtil.getEventImageUrl(event.getId());
                     } catch (Exception e) {
                         log.warn("행사 이미지 URL 생성 실패 (eventId: {}): {}", event.getId(), e.getMessage());
-                        return dto;
                     }
+                    
+                    if (event.getHost() != null) {
+                        try {
+                            hostImageUrl = minioUtil.getProfileImageUrl(event.getHost().getId());
+                        } catch (Exception e) {
+                            log.warn("호스트 이미지 URL 생성 실패 (userId: {}): {}", event.getHost().getId(), e.getMessage());
+                        }
+                    }
+                    
+                    return EventResDTO.builder()
+                            .eventId(dto.getEventId())
+                            .title(dto.getTitle())
+                            .startTime(dto.getStartTime())
+                            .endTime(dto.getEndTime())
+                            .streetAddress(dto.getStreetAddress())
+                            .lotNumberAddress(dto.getLotNumberAddress())
+                            .price(dto.getPrice())
+                            .playlistUrl(dto.getPlaylistUrl())
+                            .capacity(dto.getCapacity())
+                            .introduction(dto.getIntroduction())
+                            .status(dto.getStatus())
+                            .imageUrl(imageUrl)
+                            .host(event.getHost() != null ? EventResDTO.HostInfo.builder()
+                                    .hostId(event.getHost().getId())
+                                    .hostName(event.getHost().getNickname())
+                                    .hostImageUrl(hostImageUrl)
+                                    .build() : null)
+                            .build();
                 })
                 .collect(Collectors.toList());
     }
@@ -205,26 +242,40 @@ public class EventServiceImpl implements EventService {
         return events.stream()
                 .map(event -> {
                     EventResDTO dto = EventConverter.toResDTO(event);
+                    String imageUrl = null;
+                    String hostImageUrl = null;
+                    
                     try {
-                        String imageUrl = minioUtil.getEventImageUrl(event.getId());
-                        return EventResDTO.builder()
-                                .eventId(dto.getEventId())
-                                .title(dto.getTitle())
-                                .startTime(dto.getStartTime())
-                                .endTime(dto.getEndTime())
-                                .streetAddress(dto.getStreetAddress())
-                                .lotNumberAddress(dto.getLotNumberAddress())
-                                .price(dto.getPrice())
-                                .playlistUrl(dto.getPlaylistUrl())
-                                .capacity(dto.getCapacity())
-                                .introduction(dto.getIntroduction())
-                                .status(dto.getStatus())
-                                .imageUrl(imageUrl)
-                                .build();
+                        imageUrl = minioUtil.getEventImageUrl(event.getId());
                     } catch (Exception e) {
                         log.warn("행사 이미지 URL 생성 실패 (eventId: {}): {}", event.getId(), e.getMessage());
-                        return dto;
                     }
+                    
+                    try {
+                        hostImageUrl = minioUtil.getProfileImageUrl(user.getId());
+                    } catch (Exception e) {
+                        log.warn("호스트 이미지 URL 생성 실패 (userId: {}): {}", user.getId(), e.getMessage());
+                    }
+                    
+                    return EventResDTO.builder()
+                            .eventId(dto.getEventId())
+                            .title(dto.getTitle())
+                            .startTime(dto.getStartTime())
+                            .endTime(dto.getEndTime())
+                            .streetAddress(dto.getStreetAddress())
+                            .lotNumberAddress(dto.getLotNumberAddress())
+                            .price(dto.getPrice())
+                            .playlistUrl(dto.getPlaylistUrl())
+                            .capacity(dto.getCapacity())
+                            .introduction(dto.getIntroduction())
+                            .status(dto.getStatus())
+                            .imageUrl(imageUrl)
+                            .host(EventResDTO.HostInfo.builder()
+                                    .hostId(user.getId())
+                                    .hostName(user.getNickname())
+                                    .hostImageUrl(hostImageUrl)
+                                    .build())
+                            .build();
                 })
                 .collect(Collectors.toList());
     }

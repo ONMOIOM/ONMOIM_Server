@@ -23,8 +23,9 @@ public class EventDetailResponse {
     private Integer capacity;
     private Status status;
     private String imageUrl;
+    private HostInfo host;
 
-    public static EventDetailResponse from(Event event, String imageUrl) {
+    public static EventDetailResponse from(Event event, String imageUrl, String hostImageUrl) {
         return EventDetailResponse.builder()
                 .eventId(event.getId())
                 .title(event.getTitle())
@@ -38,6 +39,19 @@ public class EventDetailResponse {
                 .playlistUrl(event.getPlaylistUrl())
                 .capacity(event.getCapacity())
                 .imageUrl(imageUrl)
+                .host(event.getHost() != null ? HostInfo.builder()
+                        .hostId(event.getHost().getId())
+                        .hostName(event.getHost().getNickname())
+                        .hostImageUrl(hostImageUrl)
+                        .build() : null)
                 .build();
+    }
+
+    @Getter
+    @Builder
+    public static class HostInfo {
+        private Long hostId;
+        private String hostName;
+        private String hostImageUrl;
     }
 }
