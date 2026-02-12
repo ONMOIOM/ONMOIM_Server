@@ -148,8 +148,8 @@ https://onmoim.site/swagger-ui/index.html
 ### 주요 API 엔드포인트
 
 #### 인증
-- `POST /api/v1/auth/signup` - 회원가입
-- `POST /api/v1/auth/login` - 로그인
+- `POST /api/v1/users/signup` - 회원가입
+- `POST /api/v1/users/login` - 로그인
 - `POST /api/v1/auth/refresh` - 토큰 갱신
 
 #### 회원
