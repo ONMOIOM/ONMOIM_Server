@@ -67,7 +67,7 @@ logging:
     backend.onmoim.global.security.JwtAuthFilter: DEBUG
 
 minio:
-  url: ${MINIO_URL}
+  internal-url: ${MINIO_URL}
   public-url: ${MINIO_PUBLIC_URL}
   access-key: ${MINIO_ACCESS_KEY}
   secret-key: ${MINIO_SECRET_KEY}

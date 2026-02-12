@@ -15,18 +15,16 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class MinioUtil {
 
-    private final MinioClient minioClient;
+    private final MinioClient internalClient;  // 업로드용
+    private final MinioClient publicClient;    // presigned URL용
 
     @Value("${minio.bucket}")
     private String bucket;
 
-    @Value("${minio.public-url}")
-    private String publicUrl;
-
     public void uploadProfileImage(MultipartFile file, Long userId) {
         try {
             log.info("프로필 이미지 업로드 시작 - userId: {}, bucket: {}", userId, bucket);
-            ensureBucketExists();
+            ensureBucketExists(internalClient);
 
             String filename = String.format("user/profile/%d/profile", userId);
             log.info("업로드 파일명: {}", filename);
@@ -38,7 +36,7 @@ public class MinioUtil {
                     .stream(file.getInputStream(), file.getSize(), 10 * 1024 * 1024)
                     .build();
 
-            minioClient.putObject(putArgs);
+            internalClient.putObject(putArgs);  // 내부 클라이언트로 업로드
             log.info("프로필 이미지 업로드 성공 - userId: {}", userId);
 
         } catch (Exception e) {
@@ -50,7 +48,7 @@ public class MinioUtil {
     public void uploadEventImage(MultipartFile file, Long eventId) {
         try {
             log.info("행사 이미지 업로드 시작 - eventId: {}, bucket: {}", eventId, bucket);
-            ensureBucketExists();
+            ensureBucketExists(internalClient);
 
             String filename = String.format("event/%d/thumbnail", eventId);
             log.info("업로드 파일명: {}", filename);
@@ -62,7 +60,7 @@ public class MinioUtil {
                     .stream(file.getInputStream(), file.getSize(), 10 * 1024 * 1024)
                     .build();
 
-            minioClient.putObject(putArgs);
+            internalClient.putObject(putArgs);  // 내부 클라이언트로 업로드
             log.info("행사 이미지 업로드 성공 - eventId: {}", eventId);
 
         } catch (Exception e) {
@@ -73,19 +71,18 @@ public class MinioUtil {
 
     public String getProfileImageUrl(Long userId) {
         try {
-            ensureBucketExists();
-            
             String filename = String.format("user/profile/%d/profile", userId);
 
-            // 파일 존재 여부 확인
-            minioClient.statObject(
+            // 파일 존재 여부 확인 (내부 클라이언트)
+            internalClient.statObject(
                     StatObjectArgs.builder()
                             .bucket(bucket)
                             .object(filename)
                             .build()
             );
 
-            String url = minioClient.getPresignedObjectUrl(
+            // 공개 URL로 presigned URL 생성 (public 클라이언트)
+            String url = publicClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(bucket)
@@ -93,8 +90,10 @@ public class MinioUtil {
                             .expiry(7 * 24 * 60 * 60)
                             .build()
             );
+
             log.debug("프로필 이미지 URL 생성 성공 - userId: {}", userId);
-            return url.replace("http://168.138.41.19:9000", publicUrl);
+            return url;
+
         } catch (Exception e) {
             log.warn("프로필 이미지 URL 생성 실패 - userId: {}, error: {}", userId, e.getMessage());
             return null;
@@ -103,19 +102,18 @@ public class MinioUtil {
 
     public String getEventImageUrl(Long eventId) {
         try {
-            ensureBucketExists();
-            
             String filename = String.format("event/%d/thumbnail", eventId);
 
-            // 파일 존재 여부 확인
-            minioClient.statObject(
+            // 파일 존재 여부 확인 (내부 클라이언트)
+            internalClient.statObject(
                     StatObjectArgs.builder()
                             .bucket(bucket)
                             .object(filename)
                             .build()
             );
 
-            String url = minioClient.getPresignedObjectUrl(
+            // 공개 URL로 presigned URL 생성 (public 클라이언트)
+            String url = publicClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(bucket)
@@ -123,25 +121,26 @@ public class MinioUtil {
                             .expiry(7 * 24 * 60 * 60)
                             .build()
             );
+
             log.debug("행사 이미지 URL 생성 성공 - eventId: {}", eventId);
-            return url.replace("http://168.138.41.19:9000", publicUrl);
+            return url;
+
         } catch (Exception e) {
             log.warn("행사 이미지 URL 생성 실패 - eventId: {}, error: {}", eventId, e.getMessage());
             return null;
         }
     }
 
-    private void ensureBucketExists() throws Exception {
-        boolean exists = minioClient.bucketExists(
+    private void ensureBucketExists(MinioClient client) throws Exception {
+        boolean exists = client.bucketExists(
                 BucketExistsArgs.builder().bucket(bucket).build());
         log.debug("버킷 존재 여부 - bucket: {}, exists: {}", bucket, exists);
-        
+
         if (!exists) {
             log.info("버킷 생성 중 - bucket: {}", bucket);
-            minioClient.makeBucket(
+            client.makeBucket(
                     MakeBucketArgs.builder().bucket(bucket).build());
             log.info("버킷 생성 완료 - bucket: {}", bucket);
         }
     }
-
 }
