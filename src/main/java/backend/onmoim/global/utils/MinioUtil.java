@@ -4,22 +4,32 @@ import backend.onmoim.global.common.code.GeneralErrorCode;
 import backend.onmoim.global.common.exception.GeneralException;
 import io.minio.*;
 import io.minio.http.Method;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class MinioUtil {
 
+    @Qualifier("internalMinioClient")
     private final MinioClient internalClient;  // 업로드용
+
+    @Qualifier("publicMinioClient")
     private final MinioClient publicClient;    // presigned URL용
 
     @Value("${minio.bucket}")
     private String bucket;
+
+    public MinioUtil(
+            @Qualifier("internalMinioClient") MinioClient internalClient,
+            @Qualifier("publicMinioClient") MinioClient publicClient
+    ) {
+        this.internalClient = internalClient;
+        this.publicClient = publicClient;
+    }
 
     public void uploadProfileImage(MultipartFile file, Long userId) {
         try {
