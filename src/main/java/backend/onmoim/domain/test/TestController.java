@@ -8,7 +8,6 @@ import backend.onmoim.domain.user.exception.UserException;
 import backend.onmoim.domain.user.repository.UserRepository;
 import backend.onmoim.global.common.ApiResponse;
 import backend.onmoim.global.common.code.GeneralSuccessCode;
-import backend.onmoim.global.common.exception.GeneralException;
 import backend.onmoim.global.utils.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

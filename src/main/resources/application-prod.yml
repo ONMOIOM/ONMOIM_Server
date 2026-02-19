@@ -52,7 +52,7 @@ spring:
           max-active: 20
           max-idle: 10
           min-idle: 5
-          max-wait: -1ms
+          max-wait: 2000ms
         shutdown-timeout: 100ms
 
 jwt:
@@ -64,7 +64,7 @@ jwt:
 
 logging:
   level:
-    backend.onmoim.global.security.JwtAuthFilter: DEBUG
+    backend.onmoim.global.security.JwtAuthFilter: WARN
 
 oci:
   endpoint: ${OCI_ENDPOINT}
