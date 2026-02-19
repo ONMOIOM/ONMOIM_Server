@@ -87,6 +87,9 @@ ONMOIM은 사용자들이 온라인으로 모임을 생성하고 참여할 수 �
 - **CI/CD**: GitHub Actions
 - **Container**: Docker
 
+<img width="1553" height="874" alt="시스템 아키텍처" src="https://github.com/user-attachments/assets/7e0831a1-0e04-408f-b6ce-b951327f0743" />
+
+
 ---
 
 ## 📁 프로젝트 구조
