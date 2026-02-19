@@ -2,9 +2,10 @@ package backend.onmoim.domain.test;
 
 import backend.onmoim.domain.auth.exception.TokenAuthErrorCode;
 import backend.onmoim.domain.user.entity.User;
+import backend.onmoim.domain.user.exception.UserErrorCode;
+import backend.onmoim.domain.user.exception.UserException;
 import backend.onmoim.domain.user.repository.UserRepository;
 import backend.onmoim.global.common.ApiResponse;
-import backend.onmoim.global.common.code.GeneralErrorCode;
 import backend.onmoim.global.common.code.GeneralSuccessCode;
 import backend.onmoim.global.common.exception.GeneralException;
 import backend.onmoim.global.utils.JwtUtil;
@@ -34,7 +35,7 @@ public class TestController {
     @PostMapping("/test/master-jwt")
     public ApiResponse<Map<String, String>> generateMasterJwt(@RequestParam String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         String accessToken = jwtUtil.createAccessToken(user);
 
@@ -59,7 +60,7 @@ public class TestController {
 
         Long userId = jwtUtil.getId(token);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         Map<String, Object> response = new HashMap<>();
         response.put("userId", user.getId());

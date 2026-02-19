@@ -12,13 +12,14 @@ import backend.onmoim.domain.event.enums.Status;
 import backend.onmoim.domain.event.repository.EventMemberRepository;
 import backend.onmoim.domain.event.repository.EventRepository;
 import backend.onmoim.domain.user.entity.User;
+import backend.onmoim.domain.user.exception.UserErrorCode;
+import backend.onmoim.domain.user.exception.UserException;
 import backend.onmoim.domain.user.repository.UserRepository;
 import backend.onmoim.global.common.code.GeneralErrorCode;
 import backend.onmoim.global.common.exception.GeneralException;
 import backend.onmoim.global.utils.MinioUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -236,7 +237,7 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public List<EventResDTO> getUserHostedEvents(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
         
         List<Event> events = eventRepository.findByHost(user);
         return events.stream()
