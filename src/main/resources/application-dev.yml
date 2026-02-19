@@ -67,7 +67,7 @@ logging:
     backend.onmoim.global.security.JwtAuthFilter: DEBUG
 
 oci:
-  endpoint: https://axjyysxkd54x.compat.objectstorage.ap-osaka-1.oraclecloud.com
+  endpoint: ${OCI_ENDPOINT}
   region: ap-osaka-1
   access-key: ${OCI_ACCESS_KEY}
   secret-key: ${OCI_SECRET_KEY}
