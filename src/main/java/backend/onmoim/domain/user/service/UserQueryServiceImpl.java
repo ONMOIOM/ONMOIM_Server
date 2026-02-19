@@ -13,6 +13,8 @@ import backend.onmoim.domain.user.dto.res.SignUpResponseDTO;
 import backend.onmoim.domain.user.dto.res.UserProfileDTO;
 import backend.onmoim.domain.user.entity.User;
 import backend.onmoim.domain.user.enums.Status;
+import backend.onmoim.domain.user.exception.UserErrorCode;
+import backend.onmoim.domain.user.exception.UserException;
 import backend.onmoim.domain.user.repository.UserQueryRepository;
 import backend.onmoim.domain.user.repository.UserRepository;
 import backend.onmoim.global.common.code.GeneralErrorCode;
@@ -50,10 +52,10 @@ public class UserQueryServiceImpl implements UserQueryService{
 
         // User 조회
         User user = userQueryRepository.findByEmail(dto.email())
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         if (user.getStatus() != Status.ACTIVE) {
-            throw new GeneralException(GeneralErrorCode.USER_INACTIVE);
+            throw new UserException(UserErrorCode.USER_INACTIVE);
         }
 
         // 이메일 인증코드 검증
@@ -99,7 +101,7 @@ public class UserQueryServiceImpl implements UserQueryService{
             userRepository.save(user);
             return UserConverter.toSignUpDTO(user);
         } catch (DataIntegrityViolationException e) {
-            throw new GeneralException(GeneralErrorCode.DUPLICATE_MEMBER);
+            throw new UserException(UserErrorCode.DUPLICATE_MEMBER);
         }
     }
 
@@ -107,11 +109,11 @@ public class UserQueryServiceImpl implements UserQueryService{
     @Transactional(readOnly = true)
     public UserProfileDTO getProfile(@AuthenticationPrincipal User user, Long userId) {
         if (user.getStatus() != Status.ACTIVE) {
-            throw new GeneralException(GeneralErrorCode.USER_INACTIVE);
+            throw new UserException(UserErrorCode.USER_INACTIVE);
         }
 
         User userprofile = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         UserProfileDTO dto = UserConverter.toProfileDTO(userprofile);
         String imageUrl = null;
@@ -130,10 +132,10 @@ public class UserQueryServiceImpl implements UserQueryService{
     public UserProfileDTO updateMyProfile(@AuthenticationPrincipal User loginUser, UserProfileUpdateDTO dto) {
 
         User user = userRepository.findById(loginUser.getId())
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         if (user.getStatus() != Status.ACTIVE) {
-            throw new GeneralException(GeneralErrorCode.USER_INACTIVE);
+            throw new UserException(UserErrorCode.USER_INACTIVE);
         }
 
         // 엔티티 메서드 호출 (null 자동 무시)

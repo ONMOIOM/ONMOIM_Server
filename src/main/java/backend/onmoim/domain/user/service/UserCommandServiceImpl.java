@@ -2,6 +2,8 @@ package backend.onmoim.domain.user.service;
 
 import backend.onmoim.domain.user.entity.User;
 import backend.onmoim.domain.user.enums.Status;
+import backend.onmoim.domain.user.exception.UserErrorCode;
+import backend.onmoim.domain.user.exception.UserException;
 import backend.onmoim.domain.user.repository.UserRepository;
 import backend.onmoim.global.common.code.GeneralErrorCode;
 import backend.onmoim.global.common.exception.GeneralException;
@@ -29,10 +31,10 @@ public class UserCommandServiceImpl implements UserCommandService {
     public void withdraw(Long userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         if (user.getStatus() != Status.ACTIVE) {
-            throw new GeneralException(GeneralErrorCode.USER_INACTIVE);
+            throw new UserException(UserErrorCode.USER_INACTIVE);
         }
 
         user.withdraw();

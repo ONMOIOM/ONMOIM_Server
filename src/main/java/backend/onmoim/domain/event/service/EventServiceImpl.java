@@ -9,16 +9,19 @@ import backend.onmoim.domain.event.dto.res.EventUpdateDTO;
 import backend.onmoim.domain.event.entity.Event;
 import backend.onmoim.domain.event.entity.EventMember;
 import backend.onmoim.domain.event.enums.Status;
+import backend.onmoim.domain.event.exception.EventErrorCode;
+import backend.onmoim.domain.event.exception.EventException;
 import backend.onmoim.domain.event.repository.EventMemberRepository;
 import backend.onmoim.domain.event.repository.EventRepository;
 import backend.onmoim.domain.user.entity.User;
+import backend.onmoim.domain.user.exception.UserErrorCode;
+import backend.onmoim.domain.user.exception.UserException;
 import backend.onmoim.domain.user.repository.UserRepository;
 import backend.onmoim.global.common.code.GeneralErrorCode;
 import backend.onmoim.global.common.exception.GeneralException;
 import backend.onmoim.global.utils.MinioUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,7 +57,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventResDTO patchEvent(Long eventId, EventUpdateDTO updateDTO,User user) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
+                .orElseThrow(() -> new EventException(EventErrorCode.EVENT_NOT_FOUND));
 
         Event updatedevent = event.update(
                 updateDTO.getTitle(),
@@ -77,7 +80,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventResDTO publishEvent(Long eventID, User user) {
         Event event = eventRepository.findById(eventID)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
+                .orElseThrow(() -> new EventException(EventErrorCode.EVENT_NOT_FOUND));
         Event publishedEvent = event.publish(user);
         Event saved = eventRepository.save(publishedEvent);
 
@@ -89,7 +92,7 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public EventDetailResponse getEventDetail(Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
+                .orElseThrow(() -> new EventException(EventErrorCode.EVENT_NOT_FOUND));
         
         String imageUrl = null;
         String hostImageUrl = null;
@@ -158,7 +161,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public void deleteEvent(Long eventId, User user) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
+                .orElseThrow(() -> new EventException(EventErrorCode.EVENT_NOT_FOUND));
         if (!event.getHost().getId().equals(user.getId())) {
             throw new GeneralException(GeneralErrorCode.BAD_REQUEST);
         }
@@ -169,7 +172,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public void castVote(Long eventId, User user, VoteRequest request) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
+                .orElseThrow(() -> new EventException(EventErrorCode.EVENT_NOT_FOUND));
 
         eventMemberRepository.findByUserAndEvent(user, event)
                 .ifPresentOrElse(
@@ -236,7 +239,7 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public List<EventResDTO> getUserHostedEvents(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
         
         List<Event> events = eventRepository.findByHost(user);
         return events.stream()
@@ -284,7 +287,7 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public List<ParticipantDto> getParticipants(Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
+                .orElseThrow(() -> new EventException(EventErrorCode.EVENT_NOT_FOUND));
 
         return eventMemberRepository.findAllByEvent(event).stream()
                 .map(member -> ParticipantDto.from(member, minioUtil))
@@ -295,7 +298,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public String uploadEventImage(Long eventId, User user, MultipartFile image) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.EVENT_NOT_FOUND));
+                .orElseThrow(() -> new EventException(EventErrorCode.EVENT_NOT_FOUND));
         
         // 호스트만 이미지 업로드 가능
         if (!event.getHost().getId().equals(user.getId())) {

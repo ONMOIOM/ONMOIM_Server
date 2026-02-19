@@ -1,5 +1,7 @@
 package backend.onmoim.global.utils;
 
+import backend.onmoim.domain.user.exception.UserErrorCode;
+import backend.onmoim.domain.user.exception.UserException;
 import backend.onmoim.domain.user.repository.UserQueryRepository;
 import backend.onmoim.global.common.code.GeneralErrorCode;
 import backend.onmoim.global.common.exception.GeneralException;
@@ -35,7 +37,7 @@ public class RandomNicknameGenerator {
                 return nickname;
             }
         }
-        throw new GeneralException(GeneralErrorCode.NICKNAME_GENERATION_FAILED);
+        throw new UserException(UserErrorCode.NICKNAME_GENERATION_FAILED);
     }
 
     private String createRandomNickname() {
