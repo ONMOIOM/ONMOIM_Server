@@ -1,6 +1,8 @@
 package backend.onmoim.domain.auth.service;
 
 import backend.onmoim.domain.auth.dto.response.RotateTokenResponseDTO;
+import backend.onmoim.domain.auth.exception.TokenAuthErrorCode;
+import backend.onmoim.domain.auth.exception.TokenAuthException;
 import backend.onmoim.domain.user.entity.User;
 import backend.onmoim.domain.user.enums.Status;
 import backend.onmoim.domain.user.repository.UserQueryRepository;
@@ -31,18 +33,18 @@ public class AuthService {
     public RotateTokenResponseDTO rotateAccessToken(String refreshToken) {
 
         if (refreshToken == null || refreshToken.trim().isEmpty()) {
-            throw new GeneralException(GeneralErrorCode.INVALID_REFRESH_TOKEN);
+            throw new TokenAuthException(TokenAuthErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         // 기존 검증 로직 (유효성, 블랙리스트, 사용자 확인)
         if (!jwtUtil.isValidRefreshToken(refreshToken)) {
-            throw new GeneralException(GeneralErrorCode.INVALID_REFRESH_TOKEN);
+            throw new TokenAuthException(TokenAuthErrorCode.INVALID_REFRESH_TOKEN);
         }
         Long ttl = getTokenExpiry(refreshToken);
         Boolean firstUse = redisTemplate.opsForValue()
                 .setIfAbsent("blacklist:" + refreshToken, "true", ttl, TimeUnit.MILLISECONDS);
         if (Boolean.FALSE.equals(firstUse)) {
-            throw new GeneralException(GeneralErrorCode.INVALID_REFRESH_TOKEN);
+            throw new TokenAuthException(TokenAuthErrorCode.EXPIRED_REFRESH_TOKEN);
         }
 
         Long userId = jwtUtil.getId(refreshToken);

@@ -1,5 +1,6 @@
 package backend.onmoim.domain.test;
 
+import backend.onmoim.domain.auth.exception.TokenAuthErrorCode;
 import backend.onmoim.domain.user.entity.User;
 import backend.onmoim.domain.user.repository.UserRepository;
 import backend.onmoim.global.common.ApiResponse;
@@ -53,7 +54,7 @@ public class TestController {
         String token = authorization.replace("Bearer ", "");
         
         if (!jwtUtil.isValidAccessToken(token)) {
-            throw new GeneralException(GeneralErrorCode.INVALID_TOKEN);
+            throw new GeneralException(TokenAuthErrorCode.INVALID_TOKEN);
         }
 
         Long userId = jwtUtil.getId(token);

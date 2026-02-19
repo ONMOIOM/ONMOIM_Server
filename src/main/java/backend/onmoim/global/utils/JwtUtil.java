@@ -1,5 +1,7 @@
 package backend.onmoim.global.utils;
 
+import backend.onmoim.domain.auth.exception.TokenAuthErrorCode;
+import backend.onmoim.domain.auth.exception.TokenAuthException;
 import backend.onmoim.domain.user.entity.User;
 import backend.onmoim.global.common.code.GeneralErrorCode;
 import backend.onmoim.global.common.exception.GeneralException;
@@ -94,7 +96,7 @@ public class JwtUtil {
             Claims claims = getClaims(token);
             return Long.parseLong(claims.getSubject());
         } catch (Exception e) {
-            throw new GeneralException(GeneralErrorCode.INVALID_TOKEN);
+            throw new TokenAuthException(TokenAuthErrorCode.INVALID_TOKEN);
         }
     }
 
@@ -136,7 +138,7 @@ public class JwtUtil {
     public boolean isValidAccessToken(String token) {
         try {
             if (token == null || token.trim().isEmpty()) {
-                throw new GeneralException(GeneralErrorCode.INVALID_TOKEN_FORMAT);
+                throw new TokenAuthException(TokenAuthErrorCode.INVALID_TOKEN_FORMAT);
             }
             Claims claims = getClaims(token);
             return "access".equals(claims.get("tokenType"));
@@ -148,7 +150,7 @@ public class JwtUtil {
     public boolean isValidRefreshToken(String token) {
         try {
             if (token == null || token.trim().isEmpty()) {
-                throw new GeneralException(GeneralErrorCode.INVALID_TOKEN_FORMAT);
+                throw new TokenAuthException(TokenAuthErrorCode.INVALID_TOKEN_FORMAT);
             }
             Claims claims = getClaims(token);
             return "refresh".equals(claims.get("tokenType"));

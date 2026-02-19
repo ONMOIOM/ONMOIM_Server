@@ -1,5 +1,7 @@
 package backend.onmoim.global.security;
 
+import backend.onmoim.domain.auth.exception.TokenAuthErrorCode;
+import backend.onmoim.domain.auth.exception.TokenAuthException;
 import backend.onmoim.domain.user.entity.User;
 import backend.onmoim.domain.user.enums.Status;
 import backend.onmoim.domain.user.repository.UserQueryRepository;
@@ -77,7 +79,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
 
             if (!jwtUtil.isValidAccessToken(accessToken)) {
-                throw new GeneralException(GeneralErrorCode.INVALID_TOKEN);
+                throw new TokenAuthException(TokenAuthErrorCode.INVALID_TOKEN);
             }
             Long userId = jwtUtil.getId(accessToken);
 
