@@ -58,14 +58,15 @@ jobs:
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_KEY }}
           script: |
+            set -e
             cd /home/ubuntu
             
             echo "새 이미지 pull"
             docker pull ${{ secrets.DOCKER_USERNAME }}/onmoim:develop
             
             echo "Docker Compose 재배포"
-            docker compose down
-            docker compose up -d
+            docker compose down --remove-orphans
+            docker compose up -d --pull never
             
             # 헬스체크 대기
             sleep 30
