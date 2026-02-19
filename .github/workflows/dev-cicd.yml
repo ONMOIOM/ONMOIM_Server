@@ -58,9 +58,37 @@ jobs:
           username: ${{ secrets.DEV_SSH_USER }}
           key: ${{ secrets.DEV_SSH_KEY }}
           script: |
+            set -e
+            cd /home/ubuntu
+            
+            echo "새 이미지 pull"
             docker pull ${{ secrets.DOCKER_USERNAME }}/onmoim:develop
-            docker stop app-dev || true
-            docker rm app-dev || true
-            docker run -d --name app-dev \
-              -p 8080:8080 \
-              ${{ secrets.DOCKER_USERNAME }}/onmoim:develop
+            
+            echo "Docker Compose 재배포"
+            docker compose down --remove-orphans
+            docker compose up -d --pull never
+            
+            # 헬스체크 대기
+            sleep 30
+            
+            # 상태 확인
+            echo "서비스 상태 확인:"
+            docker compose ps
+            
+            # 헬스체크 상세 확인
+            echo "상세 상태:"
+            docker ps -a
+            
+            echo "배포 완료"
+
+      - name: Send Discord Notification on Failure
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          status: ${{ job.status }}
+          title: "CI/CD 빌드 실패"
+          description: |
+            작업: ${{ github.workflow }}
+            작성자: ${{ github.actor }}
+            [로그 확인하기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
